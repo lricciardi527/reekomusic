@@ -44,6 +44,21 @@
   .section { display: none; }
   .section.active { display: block; }
 
+  /* ── PIN SCREEN ── */
+  #pin-screen { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .pin-box { text-align:center; max-width:320px; width:100%; }
+  .pin-logo { font-family:'Bebas Neue',sans-serif; font-size:48px; color:var(--accent); line-height:1; margin-bottom:6px; }
+  .pin-sub { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:36px; }
+  .pin-dots { display:flex; justify-content:center; gap:14px; margin-bottom:28px; }
+  .pin-dot { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); background:transparent; transition:all 0.15s; }
+  .pin-dot.filled { background:var(--accent); border-color:var(--accent); }
+  .pin-dot.error { background:var(--red); border-color:var(--red); }
+  .pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+  .pin-key { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px; font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--text); cursor:pointer; transition:all 0.15s; user-select:none; }
+  .pin-key:hover { background:var(--surface2); border-color:var(--muted); }
+  .pin-key:active { transform:scale(0.93); background:var(--surface2); }
+  .pin-key.del { font-family:'Space Mono',monospace; font-size:16px; color:var(--muted); }
+
   /* ── TODAY TAB ── */
   .today-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
   .today-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; }
@@ -744,6 +759,105 @@ const LESSONS = [
 ];
 
 // ─────────────────────────────────────────────
+// PIN LOCK
+// ─────────────────────────────────────────────
+const PIN_HASH_KEY = 'guitar_pin_hash';
+const PIN_SESSION_KEY = 'guitar_pin_session';
+const DEFAULT_PIN = '1234'; // user should change this via settings
+
+function hashPin(pin) {
+  // Simple deterministic hash — not cryptographic but keeps PIN off-screen
+  let h = 0;
+  for (let i = 0; i < pin.length; i++) {
+    h = (Math.imul(31, h) + pin.charCodeAt(i)) | 0;
+  }
+  return 'pin_' + Math.abs(h).toString(36);
+}
+
+function getStoredPinHash() {
+  return localStorage.getItem(PIN_HASH_KEY) || hashPin(DEFAULT_PIN);
+}
+
+function isPinSet() {
+  return !!localStorage.getItem(PIN_HASH_KEY);
+}
+
+function isSessionUnlocked() {
+  return sessionStorage.getItem(PIN_SESSION_KEY) === 'unlocked';
+}
+
+function unlockSession() {
+  sessionStorage.setItem(PIN_SESSION_KEY, 'unlocked');
+}
+
+let pinBuffer = '';
+
+function renderPinDots(state) {
+  // state: 'idle' | 'error'
+  document.querySelectorAll('.pin-dot').forEach((dot, i) => {
+    dot.classList.remove('filled', 'error');
+    if (state === 'error') { dot.classList.add('error'); return; }
+    if (i < pinBuffer.length) dot.classList.add('filled');
+  });
+}
+
+function pinKey(val) {
+  if (val === 'del') {
+    pinBuffer = pinBuffer.slice(0, -1);
+    renderPinDots('idle');
+    return;
+  }
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += val;
+  renderPinDots('idle');
+  if (pinBuffer.length === 4) {
+    setTimeout(() => checkPin(), 120);
+  }
+}
+
+function checkPin() {
+  if (hashPin(pinBuffer) === getStoredPinHash()) {
+    unlockSession();
+    document.getElementById('pin-screen').style.display = 'none';
+  } else {
+    renderPinDots('error');
+    // Shake animation
+    const box = document.querySelector('.pin-box');
+    box.style.animation = 'none';
+    box.offsetHeight; // reflow
+    box.style.animation = 'pinShake 0.4s ease';
+    setTimeout(() => {
+      pinBuffer = '';
+      renderPinDots('idle');
+    }, 600);
+  }
+}
+
+function changePin() {
+  const current = prompt('Enter your current PIN:');
+  if (!current) return;
+  if (hashPin(current) !== getStoredPinHash()) { alert('Incorrect PIN.'); return; }
+  const newPin = prompt('Enter your new 4-digit PIN:');
+  if (!newPin || !/^\d{4}$/.test(newPin)) { alert('PIN must be exactly 4 digits.'); return; }
+  const confirm = prompt('Confirm your new PIN:');
+  if (newPin !== confirm) { alert('PINs do not match.'); return; }
+  localStorage.setItem(PIN_HASH_KEY, hashPin(newPin));
+  alert('✓ PIN updated.');
+}
+
+function initPinScreen() {
+  if (isSessionUnlocked()) {
+    document.getElementById('pin-screen').style.display = 'none';
+    return;
+  }
+  // First time — set default PIN hash silently
+  if (!isPinSet()) {
+    localStorage.setItem(PIN_HASH_KEY, hashPin(DEFAULT_PIN));
+  }
+  document.getElementById('pin-screen').style.display = 'flex';
+}
+
+// ─────────────────────────────────────────────
 // SUPABASE CLOUD SYNC
 // ─────────────────────────────────────────────
 const LOCAL_KEY = 'guitar_course_v2';
@@ -1031,10 +1145,49 @@ function toggleCheck(el) {
 // INIT
 // ─────────────────────────────────────────────
 (async () => {
+  initPinScreen();
   await loadState();
   renderToday();
 })();
 </script>
+<!-- PIN SCREEN -->
+<style>
+@keyframes pinShake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-10px); }
+  40%      { transform: translateX(10px); }
+  60%      { transform: translateX(-8px); }
+  80%      { transform: translateX(8px); }
+}
+</style>
+<div id="pin-screen">
+  <div class="pin-box">
+    <div class="pin-logo">🎸</div>
+    <div class="pin-sub">Enter PIN to continue</div>
+    <div class="pin-dots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-pad">
+      <div class="pin-key" onclick="pinKey('1')">1</div>
+      <div class="pin-key" onclick="pinKey('2')">2</div>
+      <div class="pin-key" onclick="pinKey('3')">3</div>
+      <div class="pin-key" onclick="pinKey('4')">4</div>
+      <div class="pin-key" onclick="pinKey('5')">5</div>
+      <div class="pin-key" onclick="pinKey('6')">6</div>
+      <div class="pin-key" onclick="pinKey('7')">7</div>
+      <div class="pin-key" onclick="pinKey('8')">8</div>
+      <div class="pin-key" onclick="pinKey('9')">9</div>
+      <div class="pin-key" style="visibility:hidden"></div>
+      <div class="pin-key" onclick="pinKey('0')">0</div>
+      <div class="pin-key del" onclick="pinKey('del')">⌫</div>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px;">Default PIN is <span style="color:var(--accent);">1234</span> — change it in ☁ Sync settings</div>
+  </div>
+</div>
+
 <!-- SETUP OVERLAY -->
 <div id="setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:560px;width:100%;padding:36px;max-height:90vh;overflow-y:auto;">
@@ -1073,6 +1226,11 @@ function toggleCheck(el) {
     </div>
 
     <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.6;">Your credentials are stored only on your device (localStorage). Nothing is sent anywhere except your own Supabase project.</div>
+
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">PIN Lock</div>
+      <button onclick="changePin()" style="padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;">🔒 Change PIN</button>
+    </div>
   </div>
 </div>
 
