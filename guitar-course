@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luca's Guitar Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --border: #2a2a2a;
+    --accent: #e8c547;
+    --accent2: #f07a3a;
+    --accent3: #5dbea3;
+    --text: #f0ede8;
+    --muted: #888;
+    --red: #e05c5c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+  .hero { padding: 60px 32px 40px; max-width: 900px; margin: 0 auto; }
+  .tag { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; display: block; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 10vw, 96px); line-height: 0.92; color: var(--text); margin-bottom: 24px; letter-spacing: 1px; }
+  h1 span { color: var(--accent); display: block; }
+  .hero-sub { font-size: 15px; color: var(--muted); max-width: 540px; line-height: 1.7; font-weight: 300; }
+  .profile-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-family: 'Space Mono', monospace; color: var(--muted); }
+  .pill.hot { border-color: var(--accent); color: var(--accent); }
+  .pill.cool { border-color: var(--accent3); color: var(--accent3); }
+  .nav-wrap { max-width: 900px; margin: 0 auto; padding: 0 32px; position: sticky; top: 0; z-index: 100; background: var(--bg); padding-top: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn { background: none; border: 1px solid transparent; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 16px; border-radius: 4px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+  .nav-btn:hover { color: var(--text); border-color: var(--border); }
+  .nav-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .content { max-width: 900px; margin: 0 auto; padding: 40px 32px 80px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── TODAY TAB ── */
+  .today-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+  .today-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; }
+  .day-nav { display: flex; align-items: center; gap: 12px; }
+  .day-nav-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Space Mono', monospace; font-size: 13px; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+  .day-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .day-indicator { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent); min-width: 80px; text-align: center; }
+
+  .lesson-card { background: var(--surface); border: 1px solid var(--accent); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+  .lesson-card-head { padding: 22px 28px; background: linear-gradient(135deg, rgba(232,197,71,0.08) 0%, transparent 100%); border-bottom: 1px solid var(--border); }
+  .lesson-focus-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .lesson-focus-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; color: var(--text); margin-bottom: 6px; }
+  .lesson-focus-sub { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .practice-blocks { padding: 20px 28px; display: flex; flex-direction: column; gap: 14px; }
+
+  .pblock { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .pblock-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px; cursor: pointer; user-select: none; }
+  .pblock-time { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); min-width: 48px; }
+  .pblock-title { font-size: 14px; font-weight: 500; flex: 1; }
+  .pblock-type { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; }
+  .type-warmup { background: rgba(93,190,163,0.15); color: var(--accent3); }
+  .type-technique { background: rgba(232,197,71,0.15); color: var(--accent); }
+  .type-theory { background: rgba(180,130,220,0.15); color: #c09be8; }
+  .type-song { background: rgba(240,122,58,0.15); color: var(--accent2); }
+  .type-create { background: rgba(224,92,92,0.15); color: var(--red); }
+  .type-ear { background: rgba(93,190,163,0.15); color: var(--accent3); }
+  .type-drums { background: rgba(240,122,58,0.15); color: var(--accent2); }
+  .type-piano { background: rgba(180,130,220,0.15); color: #c09be8; }
+  .pblock-chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+  .pblock.open .pblock-chevron { transform: rotate(180deg); }
+
+  .pblock-body { display: none; padding: 0 18px 18px; border-top: 1px solid var(--border); }
+  .pblock.open .pblock-body { display: block; }
+  .pblock-instruction { font-size: 13px; color: var(--muted); line-height: 1.7; margin-top: 14px; margin-bottom: 14px; }
+  .pblock-instruction strong { color: var(--text); }
+
+  .resource-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .res-link { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; font-size: 12px; color: var(--text); text-decoration: none; transition: all 0.2s; font-family: 'Space Mono', monospace; }
+  .res-link:hover { border-color: var(--accent); color: var(--accent); }
+  .res-link .link-icon { font-size: 14px; }
+
+  .complete-btn { width: 100%; margin-top: 20px; padding: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
+  .complete-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  .complete-btn.done { background: rgba(93,190,163,0.1); border-color: var(--accent3); color: var(--accent3); }
+
+  .streak-bar { display: flex; gap: 6px; margin-bottom: 28px; flex-wrap: wrap; }
+  .streak-dot { width: 28px; height: 28px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'Space Mono', monospace; color: var(--muted); cursor: default; }
+  .streak-dot.done { background: rgba(93,190,163,0.2); border-color: var(--accent3); color: var(--accent3); }
+  .streak-dot.today { border-color: var(--accent); color: var(--accent); }
+
+  /* ── STAGE CARDS ── */
+  .stage-grid { display: flex; flex-direction: column; gap: 24px; }
+  .stage-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+  .stage-card:hover { border-color: var(--accent); }
+  .stage-header { display: flex; align-items: center; gap: 20px; padding: 24px 28px; cursor: pointer; user-select: none; }
+  .stage-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--accent); line-height: 1; min-width: 44px; opacity: 0.4; }
+  .stage-card.current .stage-num { opacity: 1; }
+  .stage-info { flex: 1; }
+  .stage-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--text); margin-bottom: 4px; }
+  .stage-meta { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .stage-badge { font-size: 11px; font-family: 'Space Mono', monospace; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .badge-now { background: var(--accent); color: #000; font-weight: 700; }
+  .badge-next { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .badge-later { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); opacity: 0.5; }
+  .stage-body { display: none; padding: 0 28px 28px; border-top: 1px solid var(--border); }
+  .stage-body.open { display: block; }
+  .skills-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  @media (max-width: 560px) { .skills-list { grid-template-columns: 1fr; } }
+  .skill-item { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.5; }
+  .skill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 7px; flex-shrink: 0; }
+  .skill-dot.green { background: var(--accent3); }
+  .skill-dot.orange { background: var(--accent2); }
+  .chevron { font-size: 16px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
+  .stage-card.open .chevron { transform: rotate(180deg); }
+
+  /* ── PRACTICE SCHEDULE ── */
+  .schedule-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .sched-head { padding: 20px 24px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .sched-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; }
+  .sched-time { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); }
+  .sched-rows { padding: 8px 0; }
+  .sched-row { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  .sched-row:last-child { border-bottom: none; }
+  .sched-row:hover { background: var(--surface2); }
+  .sched-mins { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent); min-width: 44px; }
+  .sched-label { font-size: 14px; flex: 1; }
+  .sched-note { font-size: 12px; color: var(--muted); max-width: 200px; text-align: right; }
+
+  /* ── RESOURCES ── */
+  .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .resource-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; text-decoration: none; color: var(--text); transition: all 0.2s; display: flex; flex-direction: column; gap: 8px; }
+  .resource-card:hover { border-color: var(--accent); background: var(--surface2); transform: translateY(-2px); }
+  .res-icon { font-size: 22px; }
+  .res-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.5px; }
+  .res-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .res-tag { font-family: 'Space Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 3px 8px; border-radius: 3px; align-self: flex-start; margin-top: 4px; }
+  .tag-guitar { background: rgba(232,197,71,0.15); color: var(--accent); }
+  .tag-theory { background: rgba(93,190,163,0.15); color: var(--accent3); }
+  .tag-drums { background: rgba(240,122,58,0.15); color: var(--accent2); }
+  .tag-piano { background: rgba(180,130,220,0.15); color: #c09be8; }
+  .tag-multi { background: rgba(255,255,255,0.07); color: var(--muted); }
+
+  .section-label { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; margin-top: 36px; display: flex; align-items: center; gap: 12px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .section-label:first-child { margin-top: 0; }
+
+  .roadmap { position: relative; padding-left: 28px; }
+  .roadmap::before { content: ''; position: absolute; left: 7px; top: 12px; bottom: 12px; width: 2px; background: linear-gradient(to bottom, var(--accent), var(--accent3), var(--border)); }
+  .roadmap-item { position: relative; padding: 0 0 32px 28px; }
+  .roadmap-item::before { content: ''; position: absolute; left: -21px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); }
+  .roadmap-item.done::before { background: var(--accent); border-color: var(--accent); }
+  .roadmap-item.now::before { background: var(--accent3); border-color: var(--accent3); box-shadow: 0 0 0 4px rgba(93,190,163,0.2); }
+  .rm-title { font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .rm-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ── DRUMS/PIANO ── */
+  .instrument-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin-bottom: 20px; }
+  .inst-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .inst-icon { font-size: 28px; }
+  .inst-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; }
+  .inst-level { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+  .tips-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .tip { display: flex; gap: 12px; font-size: 14px; line-height: 1.6; }
+  .tip-num { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent2); min-width: 20px; padding-top: 2px; }
+
+  /* ── TRACKER ── */
+  .tracker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  @media (max-width: 560px) { .tracker-grid { grid-template-columns: 1fr; } }
+  .tracker-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; cursor: pointer; transition: all 0.2s; user-select: none; }
+  .tracker-item:hover { border-color: var(--muted); }
+  .tracker-item.checked { border-color: var(--accent3); background: rgba(93,190,163,0.06); }
+  .tracker-item-inner { display: flex; align-items: center; gap: 12px; }
+  .check-box { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s; }
+  .tracker-item.checked .check-box { background: var(--accent3); border-color: var(--accent3); color: #000; }
+  .tracker-label { font-size: 13px; line-height: 1.4; }
+  .progress-bar-wrap { background: var(--surface2); border-radius: 4px; height: 6px; margin-bottom: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent)); border-radius: 4px; transition: width 0.4s ease; }
+  .progress-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="tag">// Your Custom Music Course</span>
+  <h1>LEARN TO<span>PLAY & CREATE</span></h1>
+  <p class="hero-sub">Built around your current level, your gear, and your goals. 30 minutes a day, structured to get you from early learner to songwriter and session player.</p>
+  <div class="profile-pills">
+    <span class="pill hot">🎸 Acoustic + Electric</span>
+    <span class="pill hot">🥁 Real Drum Kit</span>
+    <span class="pill hot">🎹 Real Piano</span>
+    <span class="pill">Early-Intermediate Guitar</span>
+    <span class="pill cool">Goal: Write + Record + Jam</span>
+    <span class="pill">Groovy Genres</span>
+    <span class="pill">30 min/day</span>
+  </div>
+</div>
+
+<div class="nav-wrap">
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('today', this)">Today</button>
+    <button class="nav-btn" onclick="showSection('roadmap', this)">Roadmap</button>
+    <button class="nav-btn" onclick="showSection('practice', this)">Schedule</button>
+    <button class="nav-btn" onclick="showSection('resources', this)">Resources</button>
+    <button class="nav-btn" onclick="showSection('drums-piano', this)">Drums & Piano</button>
+    <button class="nav-btn" onclick="showSection('tracker', this)">Progress</button>
+    <button class="nav-btn" onclick="showSetup()" style="margin-left:auto; border-color: var(--border);">☁ Sync</button>
+    <span id="sync-status" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:8px 4px;white-space:nowrap;align-self:center;">local only</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ══════════════════ TODAY TAB ══════════════════ -->
+  <div class="section active" id="today">
+    <div class="today-header">
+      <div class="today-title">TODAY'S LESSON</div>
+      <div class="day-nav">
+        <button class="day-nav-btn" onclick="changeDay(-1)">← Prev</button>
+        <div class="day-indicator" id="day-indicator">Day 1</div>
+        <button class="day-nav-btn" onclick="changeDay(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Streak dots -->
+    <div class="streak-bar" id="streak-bar"></div>
+
+    <!-- Lesson card rendered by JS -->
+    <div id="lesson-output"></div>
+  </div>
+
+  <!-- ══════════════════ ROADMAP ══════════════════ -->
+  <div class="section" id="roadmap">
+    <div class="stage-grid">
+      <div class="stage-card current" id="card-1">
+        <div class="stage-header" onclick="toggleStage('card-1')">
+          <div class="stage-num">01</div>
+          <div class="stage-info">
+            <div class="stage-title">Lock In Your Foundation</div>
+            <div class="stage-meta">Months 1–2 &nbsp;·&nbsp; Chord fluency, rhythm, ear training</div>
+          </div>
+          <span class="stage-badge badge-now">START HERE</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="stage-body open">
+          <div class="skills-list">
+            <div class="skill-item"><div class="skill-dot"></div>Barre chord speed drills (F, Bm, B)</div>
+            <div class="skill-item"><div class="skill-dot"></div>Chord transitions under a metronome</div>
+            <div class="skill-item"><div class="skill-dot"></div>Basic strumming patterns (8th note grooves)</div>
+            <div class="skill-item"><div class="skill-dot"></div>Pentatonic minor scale (position 1)</div>
+            <div class="skill-item"><div class="skill-dot"></div>Learn 2-3 full songs in your genre</div>
+            <div class="skill-item"><div class="skill-dot"></div>Ear training: intervals, matching pitch</div>
+            <div class="skill-item"><div class="skill-dot"></div>Understand what a key is (root, I-IV-V)</div>
+            <div class="skill-item"><div class="skill-dot"></div>Intro to fingerpicking patterns</div>
+          </div>
+        </div>
+      </div>
+      <div class="stage-card" id="card-2">
+        <div class="stage-header" onclick="toggleStage('card-2')">
+          <div class="stage-num">02</div>
+          <div class="stage-info">
+            <div class="stage-title">Groove, Theory & Song Structure</div>
+            <div class="stage-meta">Months 3–4 &nbsp;·&nbsp; Rhythm depth, basic theory, writing</div>
+          </div>
+          <span class="stage-badge badge-next">NEXT</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="skills-list">
+            <div class="skill-item"><div class="skill-dot green"></div>Pentatonic minor all 5 positions</div>
+            <div class="skill-item"><div class="skill-dot green"></div>CAGED system introduction</div>
+            <div class="skill-item"><div class="skill-dot green"></div>I-IV-V-vi chord progressions in any key</div>
+            <div class="skill-item"><div class="skill-dot green"></div>16th note strumming + muting grooves</div>
+            <div class="skill-item"><div class="skill-dot green"></div>Funk rhythm: muted chops + ghost strums</div>
+            <div class="skill-item"><div class="skill-dot green"></div>Write your first chord progression</div>
+            <div class="skill-item"><div class="skill-dot green"></div>Verse / chorus song structure basics</div>
+            <div class="skill-item"><div class="skill-dot green"></div>Basic singing + playing simultaneously</div>
+          </div>
+        </div>
+      </div>
+      <div class="stage-card" id="card-3">
+        <div class="stage-header" onclick="toggleStage('card-3')">
+          <div class="stage-num">03</div>
+          <div class="stage-info">
+            <div class="stage-title">Lead Guitar, Modes & Songwriting</div>
+            <div class="stage-meta">Months 5–7 &nbsp;·&nbsp; Soloing, expression, writing full songs</div>
+          </div>
+          <span class="stage-badge badge-later">LATER</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="skills-list">
+            <div class="skill-item"><div class="skill-dot orange"></div>Bends, hammer-ons, pull-offs, slides</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Blues scale + mixing with pentatonic</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Dorian mode (essential for groovy/funk)</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Full song writing: melody + chords</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Lyric writing fundamentals</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Rhythm vs lead guitar role understanding</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Improvise over a backing track</div>
+            <div class="skill-item"><div class="skill-dot orange"></div>Intro to recording: GarageBand or Audacity</div>
+          </div>
+        </div>
+      </div>
+      <div class="stage-card" id="card-4">
+        <div class="stage-header" onclick="toggleStage('card-4')">
+          <div class="stage-num">04</div>
+          <div class="stage-info">
+            <div class="stage-title">Record, Perform & Build Your Sound</div>
+            <div class="stage-meta">Months 8–12 &nbsp;·&nbsp; Recording workflow, live playing, identity</div>
+          </div>
+          <span class="stage-badge badge-later">FUTURE</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="stage-body">
+          <div class="skills-list">
+            <div class="skill-item"><div class="skill-dot"></div>Multi-track recording a full song</div>
+            <div class="skill-item"><div class="skill-dot"></div>Tone dialing on electric (amp settings)</div>
+            <div class="skill-item"><div class="skill-dot"></div>Chord extensions: 7ths, 9ths, sus chords</div>
+            <div class="skill-item"><div class="skill-dot"></div>Playing with a drummer (or drum loop)</div>
+            <div class="skill-item"><div class="skill-dot"></div>Open mic / jam session experience</div>
+            <div class="skill-item"><div class="skill-dot"></div>Build a personal "signature" 5-song set</div>
+            <div class="skill-item"><div class="skill-dot"></div>MIDI drums to back your recordings</div>
+            <div class="skill-item"><div class="skill-dot"></div>Develop a consistent creative process</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCHEDULE ══════════════════ -->
+  <div class="section" id="practice">
+    <div class="schedule-block">
+      <div class="sched-head"><div class="sched-title">Stage 1 Practice Block</div><div class="sched-time">30 MIN TOTAL</div></div>
+      <div class="sched-rows">
+        <div class="sched-row"><div class="sched-mins">5 min</div><div class="sched-label">Warmup: chromatic exercises + stretches</div><div class="sched-note">Slow, deliberate. Fingers loose.</div></div>
+        <div class="sched-row"><div class="sched-mins">8 min</div><div class="sched-label">Chord transitions drill</div><div class="sched-note">Use a metronome. G→Bm→Em→D etc.</div></div>
+        <div class="sched-row"><div class="sched-mins">7 min</div><div class="sched-label">Strumming / rhythm pattern practice</div><div class="sched-note">Pick one pattern, loop it clean.</div></div>
+        <div class="sched-row"><div class="sched-mins">5 min</div><div class="sched-label">Pentatonic scale (position 1)</div><div class="sched-note">Up + down. Then improvise 2 min free.</div></div>
+        <div class="sched-row"><div class="sched-mins">5 min</div><div class="sched-label">Ear training</div><div class="sched-note">Use musictheory.net or ToneSavvy.</div></div>
+      </div>
+    </div>
+    <div class="schedule-block">
+      <div class="sched-head"><div class="sched-title">Stage 2 Practice Block</div><div class="sched-time">30 MIN TOTAL</div></div>
+      <div class="sched-rows">
+        <div class="sched-row"><div class="sched-mins">5 min</div><div class="sched-label">Warmup: scale runs with metronome</div><div class="sched-note">Pentatonic all 5 positions, rotate each day.</div></div>
+        <div class="sched-row"><div class="sched-mins">8 min</div><div class="sched-label">Groove rhythm drill</div><div class="sched-note">16th note muting patterns. Funky.</div></div>
+        <div class="sched-row"><div class="sched-mins">7 min</div><div class="sched-label">Theory + CAGED study</div><div class="sched-note">JustinGuitar theory or musictheory.net</div></div>
+        <div class="sched-row"><div class="sched-mins">5 min</div><div class="sched-label">Songwriting / chord progression session</div><div class="sched-note">Noodle a riff, record voice memo, save it.</div></div>
+        <div class="sched-row"><div class="sched-mins">5 min</div><div class="sched-label">Sing + play a song section</div><div class="sched-note">Slow tempo. Focus on locking voice to strum.</div></div>
+      </div>
+    </div>
+    <div class="section-label">Key Principles</div>
+    <div class="roadmap">
+      <div class="roadmap-item done"><div class="rm-title">Always use a metronome</div><div class="rm-desc">Groove is everything in your genre. Use Musicca Metronome free in your browser.</div></div>
+      <div class="roadmap-item now"><div class="rm-title">Record yourself every week</div><div class="rm-desc">Even just your phone on the table. Fastest way to hear what needs work and track real progress.</div></div>
+      <div class="roadmap-item"><div class="rm-title">Learn songs in your genre</div><div class="rm-desc">Tame Impala, Khruangbin, Arctic Monkeys, Anderson .Paak, early RHCP.</div></div>
+      <div class="roadmap-item"><div class="rm-title">Voice memos are your creative notebook</div><div class="rm-desc">Every time you hit a cool riff, record it immediately. Most great ideas vanish in 5 minutes.</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ RESOURCES ══════════════════ -->
+  <div class="section" id="resources">
+    <div class="section-label">Guitar Lessons</div>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.justinguitar.com" target="_blank"><div class="res-icon">🎸</div><div class="res-name">JustinGuitar</div><div class="res-desc">The best free structured guitar course online. Clear progression path. Has a dedicated app too.</div><span class="res-tag tag-guitar">Guitar · Free</span></a>
+      <a class="resource-card" href="https://www.youtube.com/@MartyMusicYT" target="_blank"><div class="res-icon">▶️</div><div class="res-name">Marty Music</div><div class="res-desc">Song-based lessons with real technique breakdowns. Great for learning specific songs you love.</div><span class="res-tag tag-guitar">Guitar · Free</span></a>
+      <a class="resource-card" href="https://www.youtube.com/@PaulDavidsTutorials" target="_blank"><div class="res-icon">▶️</div><div class="res-name">Paul Davids</div><div class="res-desc">Deep dives into technique, tone, and theory. Understand WHY things work, not just HOW.</div><span class="res-tag tag-guitar">Guitar · Free</span></a>
+      <a class="resource-card" href="https://www.youtube.com/@Signals_Music_Studio" target="_blank"><div class="res-icon">▶️</div><div class="res-name">Signals Music Studio</div><div class="res-desc">Best YouTube channel for music theory through guitar. Friendly, clear, song-based.</div><span class="res-tag tag-theory">Theory · Free</span></a>
+    </div>
+    <div class="section-label">Music Theory & Ear Training</div>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.musictheory.net" target="_blank"><div class="res-icon">🎵</div><div class="res-name">musictheory.net</div><div class="res-desc">Free interactive lessons covering scales, intervals, and chord construction.</div><span class="res-tag tag-theory">Theory · Free</span></a>
+      <a class="resource-card" href="https://www.tonedear.com" target="_blank"><div class="res-icon">👂</div><div class="res-name">ToneDear</div><div class="res-desc">Free ear training. Intervals, chords, scales. 5 min/day will transform your ability to jam by ear.</div><span class="res-tag tag-theory">Ear Training · Free</span></a>
+      <a class="resource-card" href="https://www.fretboard.io" target="_blank"><div class="res-icon">🔷</div><div class="res-name">Fretboard.io</div><div class="res-desc">Interactive fretboard trainer. Learn where every note lives on the neck.</div><span class="res-tag tag-guitar">Fretboard · Free</span></a>
+      <a class="resource-card" href="https://teoria.com" target="_blank"><div class="res-icon">📐</div><div class="res-name">Teoria</div><div class="res-desc">Ear training + theory exercises. Interval recognition, chord ID, rhythm training.</div><span class="res-tag tag-theory">Ear Training · Free</span></a>
+    </div>
+    <div class="section-label">Tabs & Song Learning</div>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.ultimate-guitar.com" target="_blank"><div class="res-icon">📄</div><div class="res-name">Ultimate Guitar</div><div class="res-desc">The internet's biggest tab library. Free access to most tabs.</div><span class="res-tag tag-guitar">Tabs · Freemium</span></a>
+      <a class="resource-card" href="https://www.chordify.net" target="_blank"><div class="res-icon">🔍</div><div class="res-name">Chordify</div><div class="res-desc">Upload or link any song and it shows you the chords in real time. Incredible for learning by ear.</div><span class="res-tag tag-guitar">Song Learning · Freemium</span></a>
+    </div>
+    <div class="section-label">Recording</div>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.apple.com/mac/garageband/" target="_blank"><div class="res-icon">🎙️</div><div class="res-name">GarageBand</div><div class="res-desc">Free on Mac/iOS. Plug your electric guitar in or use built-in mic for acoustic. Best free DAW for beginners.</div><span class="res-tag tag-multi">Recording · Free</span></a>
+      <a class="resource-card" href="https://www.audacityteam.org" target="_blank"><div class="res-icon">🔊</div><div class="res-name">Audacity</div><div class="res-desc">Free, open-source, cross-platform. Great for capturing ideas fast or basic multi-track recording.</div><span class="res-tag tag-multi">Recording · Free</span></a>
+      <a class="resource-card" href="https://www.musicca.com/metronome" target="_blank"><div class="res-icon">⏱️</div><div class="res-name">Musicca Metronome</div><div class="res-desc">Free browser metronome. No download. Works great on mobile. Use this every session.</div><span class="res-tag tag-multi">Tool · Free</span></a>
+    </div>
+  </div>
+
+  <!-- ══════════════════ DRUMS & PIANO ══════════════════ -->
+  <div class="section" id="drums-piano">
+    <div class="instrument-block">
+      <div class="inst-header"><div class="inst-icon">🥁</div><div><div class="inst-title">Drums</div><div class="inst-level">Your level: Early Beginner &nbsp;·&nbsp; Gear: Full Kit &nbsp;·&nbsp; Focus: Groove, pocket + locking with guitar</div></div></div>
+      <div class="tips-list">
+        <div class="tip"><div class="tip-num">01</div><div>Since you have a real kit, your #1 priority is a solid, consistent 4/4 beat: kick on 1 and 3, snare on 2 and 4, hi-hat keeping steady 8th notes. Get that completely automatic before adding anything. Use a metronome every single session.</div></div>
+        <div class="tip"><div class="tip-num">02</div><div>The most powerful thing you can do early: record your guitar, then sit behind the kit and play a beat over it. This is literally how songs get made. It builds groove instinct, coordination, and your ear for how drums and guitar lock together.</div></div>
+        <div class="tip"><div class="tip-num">03</div><div>For groovy genres, study the "pocket." Listen to how the kick and snare breathe slightly behind the beat in funk and soul. Clyde Stubblefield (James Brown), Questlove, and John Bonham are your reference points. Copy their feel, not just their patterns.</div></div>
+        <div class="tip"><div class="tip-num">04</div><div>Beginner milestone goal: learn a basic rock beat, a basic shuffle (triplet feel), and a simple syncopated funk groove. Those three patterns cover most of the music you want to play and write.</div></div>
+        <div class="tip"><div class="tip-num">05</div><div>Practice pad work still matters even with a full kit. Use it for rudiments (single stroke, double stroke, paradiddle) during low-noise times. 10 minutes of rudiment work a day will rapidly improve your control and speed on the kit.</div></div>
+      </div>
+    </div>
+    <div class="instrument-block">
+      <div class="inst-header"><div class="inst-icon">🎹</div><div><div class="inst-title">Piano</div><div class="inst-level">Your level: Early Beginner &nbsp;·&nbsp; Gear: Real Piano &nbsp;·&nbsp; Focus: Theory, chords + songwriting</div></div></div>
+      <div class="tips-list">
+        <div class="tip"><div class="tip-num">01</div><div>Having a real piano is a massive advantage for theory. The visual layout makes keys, scales, and chord shapes click in a way a fretboard never does. Spend even 10-15 min a week here and your guitar theory understanding will double in speed.</div></div>
+        <div class="tip"><div class="tip-num">02</div><div>First goal: play the C major scale with both hands, then build the I-IV-V-vi chords (C, F, G, Am) in root position. Once those are solid, transpose to G major. This teaches you everything about how keys work.</div></div>
+        <div class="tip"><div class="tip-num">03</div><div>Use piano as a songwriting sketch pad. When you have a chord progression idea, play it on piano first. You can hear the harmony more cleanly than on guitar.</div></div>
+        <div class="tip"><div class="tip-num">04</div><div>For groovy genres, learn to play basic 7th chords on piano: Cmaj7, Am7, Dm7, G7. These are the building blocks of soul, R&B, and funk harmony.</div></div>
+        <div class="tip"><div class="tip-num">05</div><div>Free lessons: Playground Sessions free tier or Simply Piano's free content are great structured options. Pair with musictheory.net so you can immediately apply what you read to real keys.</div></div>
+      </div>
+    </div>
+    <div class="section-label">Resources for Drums & Piano</div>
+    <div class="resource-grid">
+      <a class="resource-card" href="https://www.youtube.com/@Drumeo" target="_blank"><div class="res-icon">🥁</div><div class="res-name">Drumeo (YouTube)</div><div class="res-desc">Best free drum education on YouTube. Beginner series covers proper technique, basic beats, fills, and groove feel. Taught on a real kit.</div><span class="res-tag tag-drums">Drums · Free</span></a>
+      <a class="resource-card" href="https://www.youtube.com/@Stephen_Taylor" target="_blank"><div class="res-icon">▶️</div><div class="res-name">Stephen Taylor Drums</div><div class="res-desc">Groove and pocket-focused lessons. Excellent for developing feel needed for funk, soul, and rock on a real kit.</div><span class="res-tag tag-drums">Drums · Free</span></a>
+      <a class="resource-card" href="https://www.youtube.com/@PlantedPiano" target="_blank"><div class="res-icon">🎹</div><div class="res-name">Planted Piano (YouTube)</div><div class="res-desc">Beginner-friendly piano lessons focused on chords, keys, and music theory. Learn through understanding, not memorization.</div><span class="res-tag tag-piano">Piano · Free</span></a>
+      <a class="resource-card" href="https://www.youtube.com/@AdamNeely" target="_blank"><div class="res-icon">🎵</div><div class="res-name">Adam Neely (YouTube)</div><div class="res-desc">Deep music theory content. Explains groove, rhythm, and harmony. Bridges all three instruments you're learning.</div><span class="res-tag tag-theory">Theory · Free</span></a>
+      <a class="resource-card" href="https://www.sightreadingfactory.com" target="_blank"><div class="res-icon">📄</div><div class="res-name">Sight Reading Factory</div><div class="res-desc">Free piano sight reading exercises. Build the connection between reading and playing on a real piano.</div><span class="res-tag tag-piano">Piano · Free Tier</span></a>
+      <a class="resource-card" href="https://www.8notes.com/piano/" target="_blank"><div class="res-icon">🎼</div><div class="res-name">8notes Piano</div><div class="res-desc">Free beginner piano sheet music and exercises organized by difficulty level.</div><span class="res-tag tag-piano">Piano · Free</span></a>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TRACKER ══════════════════ -->
+  <div class="section" id="tracker">
+    <div class="section-label">Stage 1 Skills Checklist</div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
+    <div class="progress-label" id="progress-label">0 of 18 completed</div>
+    <div class="tracker-grid" id="tracker-grid">
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Barre chords clean (F, Bm, B)</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Chord transitions under metronome</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">8th note strumming pattern locked in</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Pentatonic minor scale position 1</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Know what a key is (root + I-IV-V)</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Can recognize major vs minor by ear</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Learned 2 songs start to finish</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Basic fingerpicking pattern (Travis or similar)</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Used Chordify to learn a song by ear</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Recorded yourself playing (any device)</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">5 ear training sessions on ToneDear</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Solid 4/4 beat on kit (kick 1&3, snare 2&4)</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Played drums to a recorded guitar part</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">I-IV-V-vi on piano in C major (both hands)</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Sketched a chord progression on piano first</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Know all natural notes on low E string</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Started JustinGuitar Beginner course</div></div></div>
+      <div class="tracker-item" onclick="toggleCheck(this)"><div class="tracker-item-inner"><div class="check-box">✓</div><div class="tracker-label">Captured a voice memo riff idea</div></div></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<script>
+// ─────────────────────────────────────────────
+// 28-DAY LESSON PLAN DATA
+// Each day: { title, subtitle, blocks[] }
+// Each block: { time, title, type, instruction, links[] }
+// links: { label, url, icon }
+// ─────────────────────────────────────────────
+const LESSONS = [
+  // WEEK 1 — Foundations
+  {
+    title: "Chromatic Warmup & Open Chord Review",
+    subtitle: "Get your fingers moving and confirm every open chord is clean before we build on them.",
+    blocks: [
+      { time:"5 min", title:"Chromatic Finger Warmup", type:"warmup", instruction:"Play 1-2-3-4 on every string, up and down the neck slowly. Keep each finger down until you lift it. No rushing — this is about control, not speed.", links:[{icon:"▶️",label:"JustinGuitar: Finger Gym",url:"https://www.justinguitar.com/guitar-lessons/the-finger-gym-bc-104"}]},
+      { time:"8 min", title:"Open Chord Clean Check", type:"technique", instruction:"Play each open chord: <strong>G, C, D, E, Em, A, Am, F</strong>. Pick each string individually — every note must ring clearly. If a string buzzes, adjust your finger placement. Go slow.", links:[{icon:"🎸",label:"JustinGuitar: Open Chords",url:"https://www.justinguitar.com/categories/beginner-guitar-lessons-grade-1"}]},
+      { time:"7 min", title:"Chord Transitions: G → C → D", type:"technique", instruction:"Set a metronome to 60 BPM. Change chord every 4 beats. Focus on lifting all fingers simultaneously and landing all fingers simultaneously. Increase tempo only when transitions feel automatic.", links:[{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"5 min", title:"Ear Training: Major vs Minor", type:"ear", instruction:"Listen to 10 examples. Identify major vs minor. This is the single most important ear skill to build early — it informs everything about jamming and writing.", links:[{icon:"👂",label:"ToneDear Chord Ear Training",url:"https://www.tonedear.com"}]},
+      { time:"5 min", title:"Free Strum + Explore", type:"create", instruction:"No rules. Just strum your guitar. Try moving between chords you know and find combinations that sound cool to you. Voice memo anything interesting.", links:[]},
+    ]
+  },
+  {
+    title: "Barre Chord Bootcamp: F Major",
+    subtitle: "F major is the wall most players hit. Today we go straight at it.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Index Finger Barre Press", type:"warmup", instruction:"Place your index finger flat across all 6 strings at fret 1. Pick each string. Find where your finger needs to sit to get all notes clean. Rest, repeat. Build up the strength slowly.", links:[]},
+      { time:"10 min", title:"F Major Barre Chord — Full Shape", type:"technique", instruction:"Full F major barre at fret 1. Don't give up if it buzzes — this takes weeks. Check: <strong>1)</strong> Is your index finger behind the fret? <strong>2)</strong> Is your thumb centered on the back of the neck? <strong>3)</strong> Are your other fingers arched?", links:[{icon:"▶️",label:"JustinGuitar: F Chord",url:"https://www.justinguitar.com/guitar-lessons/the-f-chord-bc-152"},{icon:"▶️",label:"Marty Music: Master the F Chord",url:"https://www.youtube.com/watch?v=eAR_8sHIH94"}]},
+      { time:"8 min", title:"Transition: Am → F → C → G", type:"technique", instruction:"Classic progression. Play it slowly at 55 BPM, 4 beats per chord. The goal is clean transitions IN and OUT of F. The open chords will feel easy now — that contrast is the point.", links:[{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"7 min", title:"Music Theory: What Is a Key?", type:"theory", instruction:"Read the lesson on major keys. Understand that a key is a home base and a family of chords. The key of C major has C, Dm, Em, F, G, Am, Bdim. This is the foundation of everything.", links:[{icon:"📚",label:"musictheory.net: Keys",url:"https://www.musictheory.net/lessons/25"},{icon:"▶️",label:"Signals Music: Keys Explained",url:"https://www.youtube.com/watch?v=_eKTOMhpy2w"}]},
+    ]
+  },
+  {
+    title: "Pentatonic Scale — Position 1",
+    subtitle: "The most important scale for jamming, soloing, and writing in your genres.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Hammer-ons & Pull-offs", type:"warmup", instruction:"On a single string, hammer-on from fret 5 to fret 7, then pull-off back. Do this on every string. Builds finger strength and introduces techniques you'll need soon.", links:[]},
+      { time:"10 min", title:"A Minor Pentatonic — Position 1", type:"technique", instruction:"The shape: frets 5-8 on low E, 5-7 on A, 5-7 on D, 5-7 on G, 5-8 on B, 5-8 on high E. Play up and down slowly with a metronome. Use alternate picking (down-up-down-up). This shape is the foundation of blues, rock, funk, and R&B guitar.", links:[{icon:"🎸",label:"JustinGuitar: Minor Pentatonic",url:"https://www.justinguitar.com/guitar-lessons/the-minor-pentatonic-scale-bc-192"},{icon:"▶️",label:"Marty Music: Pentatonic Scale",url:"https://www.youtube.com/watch?v=OvwSa4PbcGI"}]},
+      { time:"8 min", title:"Improvise Over A Minor Backing Track", type:"create", instruction:"Use ONLY the 5 notes of the A minor pentatonic you just learned. Don't worry about sounding good — just experiment with starting and stopping, playing slowly, landing on different notes. Feel which notes sound 'at rest.'", links:[{icon:"▶️",label:"A Minor Backing Track (YouTube)",url:"https://www.youtube.com/watch?v=HxNGxr7jyqk"}]},
+      { time:"7 min", title:"Ear Training: Intervals", type:"ear", instruction:"Work on identifying intervals — the distance between two notes. Start with unison and octave, then add perfect 5th. This is what lets you figure out melodies by ear.", links:[{icon:"👂",label:"ToneDear Interval Training",url:"https://www.tonedear.com"},{icon:"📚",label:"musictheory.net: Intervals",url:"https://www.musictheory.net/lessons/31"}]},
+    ]
+  },
+  {
+    title: "Rhythm Deep Dive — 8th Note Strumming",
+    subtitle: "Groove is feel + consistency. Today we build the rhythmic foundation everything else sits on.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Muted Strum Patterns", type:"warmup", instruction:"Palm mute all strings. Practice just the strumming hand — down on beats 1,2,3,4 and up on the 'ands' (1 + 2 + 3 + 4 +). No chord changes yet. Focus entirely on the strumming hand staying even.", links:[]},
+      { time:"10 min", title:"8th Note Pattern on G Chord", type:"technique", instruction:"Pattern: D DU UDU (down, down-up, up-down-up). This is the most common strumming pattern in pop/rock/groove music. Set metronome to 70 BPM, loop the G chord. Your strumming arm should feel like a pendulum — never stops moving, even on the silent upstrokes.", links:[{icon:"▶️",label:"JustinGuitar: Strumming Patterns",url:"https://www.justinguitar.com/guitar-lessons/strumming-patterns-bc-142"},{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"8 min", title:"Apply Pattern to G → Em → C → D", type:"technique", instruction:"Classic I-vi-IV-V in G major. Apply the DU UDU pattern across chord changes. Don't stop the strumming hand when changing chords — strum through the transition even if it sounds messy. Consistency over perfection.", links:[]},
+      { time:"7 min", title:"Piano: C Major Scale, Both Hands", type:"piano", instruction:"Sit at the piano. Play C D E F G A B C with your right hand, then left hand, then both together slowly. This is your first step toward understanding how scales map to keys. It connects directly to what you're learning on guitar.", links:[{icon:"🎹",label:"Planted Piano: C Major Scale",url:"https://www.youtube.com/@PlantedPiano"},{icon:"📚",label:"musictheory.net: Scales",url:"https://www.musictheory.net/lessons/22"}]},
+    ]
+  },
+  {
+    title: "Bm Barre Chord + I-IV-V Progressions",
+    subtitle: "Bm is essential for groovy music in D major. Plus your first real theory application.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Chromatic + Stretches", type:"warmup", instruction:"Chromatic run 1-2-3-4, then stretch: place finger 1 on fret 5 and finger 4 on fret 9 on the same string. Hold, release, repeat across all strings.", links:[]},
+      { time:"10 min", title:"Bm Barre Chord at Fret 2", type:"technique", instruction:"Bm is the A-shape barre chord at fret 2. Barre index across all strings at fret 2, ring finger on fret 4 of A string, pinky fret 4 of D string, middle finger fret 3 of G string. This shape unlocks every minor chord on the neck.", links:[{icon:"▶️",label:"JustinGuitar: Bm Chord",url:"https://www.justinguitar.com/guitar-lessons/bm-chord-bc-153"},{icon:"▶️",label:"Marty Music: Bm Shape",url:"https://www.youtube.com/watch?v=lQxpz7BhM_4"}]},
+      { time:"8 min", title:"I-IV-V Progression in G Major: G → C → D", type:"technique", instruction:"These are the 1st, 4th, and 5th chords in G major. This progression is the backbone of blues, rock, and country. Play it with your 8th note strumming pattern. Then try it in D major: D → G → A. Same shape relationship, different root.", links:[{icon:"▶️",label:"Signals Music: I IV V Explained",url:"https://www.youtube.com/watch?v=_eKTOMhpy2w"}]},
+      { time:"7 min", title:"Ear Training + Fretboard Notes", type:"ear", instruction:"Spend 4 min on ToneDear, then 3 min on Fretboard.io. Start learning the natural notes on the low E string: E-F-G-A-B-C-D-E. These are your barre chord root notes — knowing them means you can play any chord anywhere.", links:[{icon:"👂",label:"ToneDear",url:"https://www.tonedear.com"},{icon:"🔷",label:"Fretboard.io",url:"https://www.fretboard.io"}]},
+    ]
+  },
+  {
+    title: "Song Learning Day — Pick a Song You Love",
+    subtitle: "Learning real songs is the fastest way to build technique with context and motivation.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Scale Run", type:"warmup", instruction:"A minor pentatonic position 1, up and down 3 times at 80 BPM. Focus on even picking — every note the same volume.", links:[{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"15 min", title:"Learn the Chords of a Song You Love", type:"song", instruction:"Pick a song in your genre — something with open or barre chords. Look up the tab or chords. Learn the verse chord progression first. Don't worry about the strum pattern yet — just get the chord shapes and order right. Good starting songs: <strong>Khruangbin - Pelicans in the Fog, Tame Impala - The Less I Know The Better, Arctic Monkeys - R U Mine?</strong>", links:[{icon:"📄",label:"Ultimate Guitar Tabs",url:"https://www.ultimate-guitar.com"},{icon:"🔍",label:"Chordify — Hear Chords in Real Time",url:"https://www.chordify.net"}]},
+      { time:"5 min", title:"Drums: Basic 4/4 Beat on Kit", type:"drums", instruction:"Sit at the kit. Kick on beats 1 and 3. Snare on 2 and 4. Hi-hat on every beat (8th notes). Start at a very slow tempo and just loop it. The goal is consistency, not speed. Use a metronome or phone timer.", links:[{icon:"▶️",label:"Drumeo: Beginner Beat #1",url:"https://www.youtube.com/watch?v=1NFZkJQElLI"}]},
+      { time:"5 min", title:"Record Yourself Playing the Song Section", type:"create", instruction:"Phone on the table. Record yourself playing the verse chords of the song you just learned. Listen back. Don't cringe — this is data. Note what sounds clean and what doesn't.", links:[]},
+    ]
+  },
+  {
+    title: "Week 1 Review + Free Play",
+    subtitle: "Consolidate everything from the week. No new content — just locking in what you've built.",
+    blocks: [
+      { time:"5 min", title:"Warmup: All Techniques Chain", type:"warmup", instruction:"1 min chromatic. 1 min hammer-ons/pull-offs. 1 min barre chord index press. 1 min pentatonic run. 1 min muted strum. This chains everything you've learned this week.", links:[]},
+      { time:"10 min", title:"Run All Chords: Open + Barre", type:"technique", instruction:"Play every chord you know: G, C, D, E, Em, A, Am, F, Bm. Pick each string individually for each chord. Then run the I-IV-V in G: G C D. Then I-IV-V in D: D G A. Clean is the goal.", links:[]},
+      { time:"8 min", title:"Improvise Over Backing Track", type:"create", instruction:"Pull up the A minor backing track again. Use the pentatonic scale. This time, try to make musical phrases — play 4 notes, pause, respond with 4 more. Think of it like a conversation, not a race.", links:[{icon:"▶️",label:"A Minor Backing Track",url:"https://www.youtube.com/watch?v=HxNGxr7jyqk"}]},
+      { time:"7 min", title:"Piano: I-IV-V-vi in C Major", type:"piano", instruction:"Play C (I), F (IV), G (V), Am (vi) on piano with your right hand, one chord at a time. These are the same chord relationships you've been playing on guitar all week — now you can see them visually on the keys.", links:[{icon:"🎹",label:"musictheory.net: Chord Building",url:"https://www.musictheory.net/lessons/40"}]},
+    ]
+  },
+
+  // WEEK 2 — Rhythm, Groove & Song Structure
+  {
+    title: "16th Note Strumming + Muting",
+    subtitle: "This is where guitar starts to feel funky. Muted strums = the secret weapon of groove guitar.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Picking Hand Loose", type:"warmup", instruction:"Hold a pick loosely. Strum muted strings (palm all strings near bridge) in 16th notes at 60 BPM. Down-up-down-up four times per beat. Your wrist should be relaxed. Tension kills groove.", links:[{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"10 min", title:"16th Note Pattern with Chord Mutes", type:"technique", instruction:"On a single chord (try Am), strum 16th notes but mute every other downstroke with your fretting hand (lift fingers slightly, don't take them off). The muted hit becomes a percussive 'chk.' Pattern: strum-mute-strum-mute. This is funk rhythm guitar.", links:[{icon:"▶️",label:"Marty Music: Funk Rhythm Guitar",url:"https://www.youtube.com/watch?v=H33fLKYU9YQ"},{icon:"▶️",label:"Paul Davids: Rhythm Guitar",url:"https://www.youtube.com/watch?v=JNBMG0CDfms"}]},
+      { time:"8 min", title:"Apply to Am → G → C → F", type:"technique", instruction:"Classic Am-based groove progression. Apply the muted 16th note pattern. Don't worry if it falls apart during chord changes — that's normal. Focus on keeping the pattern going even if a chord sounds slightly off.", links:[]},
+      { time:"7 min", title:"Ear Training: Chord Qualities", type:"ear", instruction:"Practice identifying major, minor, dominant 7th, and minor 7th chords by ear. These are the four chord types you'll encounter most in groovy music. The minor 7th especially — it's the sound of funk and soul.", links:[{icon:"👂",label:"ToneDear: Chord Ear Training",url:"https://www.tonedear.com"}]},
+    ]
+  },
+  {
+    title: "Fingerpicking — Travis Pattern",
+    subtitle: "Fingerpicking opens up acoustic songwriting in a big way and builds independence between hands.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Right Hand Finger Placement", type:"warmup", instruction:"Thumb (p) on strings 6, 5, 4. Index (i) on string 3. Middle (m) on string 2. Ring (a) on string 1. Pluck each one individually without moving the wrist. Just fingers.", links:[]},
+      { time:"12 min", title:"Travis Picking Pattern on G Chord", type:"technique", instruction:"Basic Travis: Thumb plucks string 6 (beat 1), Index plucks string 3 (and of 1), Thumb plucks string 4 (beat 2), Middle plucks string 2 (and of 2). Repeat. This pattern is used in hundreds of folk, rock, and indie songs. Go extremely slow at first.", links:[{icon:"▶️",label:"JustinGuitar: Fingerpicking",url:"https://www.justinguitar.com/guitar-lessons/travis-picking-pattern-bc-162"},{icon:"▶️",label:"Marty Music: Travis Picking",url:"https://www.youtube.com/watch?v=3gN2LxBf5Lg"}]},
+      { time:"8 min", title:"Apply Pattern to G → C → Am → D", type:"technique", instruction:"Once the pattern is automatic on G, try switching chords while maintaining it. The thumb pattern stays the same (6-4-5-4 bass alternation) while you change the top notes. This is the core of fingerstyle songwriting.", links:[]},
+      { time:"5 min", title:"Fretboard Notes: Low E String", type:"theory", instruction:"Memorize: E(0) F(1) G(3) A(5) B(7) C(8) D(10) E(12). Quiz yourself: point to a fret, name the note. These are your barre chord root positions. Knowing them means you can play any chord anywhere on the neck.", links:[{icon:"🔷",label:"Fretboard.io",url:"https://www.fretboard.io"}]},
+    ]
+  },
+  {
+    title: "Pentatonic Scale — All 5 Positions Overview",
+    subtitle: "The same 5 notes cover the whole neck. Today we see the map.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Position 1 at Speed", type:"warmup", instruction:"A minor pentatonic position 1 at 90 BPM, up and down twice. Then slow back to 70 and play it with feel — add a bend on the high note, add a slide, explore.", links:[{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"12 min", title:"Pentatonic Positions 2 and 3", type:"technique", instruction:"Position 2 starts at fret 8 on low E (B note). Position 3 starts at fret 10 (D note). Learn each one slowly — up and down. The shapes will feel odd at first. Don't rush — you're building a map of the neck.", links:[{icon:"▶️",label:"JustinGuitar: 5 Pentatonic Positions",url:"https://www.justinguitar.com/guitar-lessons/the-5-pentatonic-positions-im-151"},{icon:"▶️",label:"Paul Davids: Pentatonic Positions",url:"https://www.youtube.com/watch?v=cWgIWxuXfX4"}]},
+      { time:"8 min", title:"Connect Positions 1 and 2 Over Backing Track", type:"create", instruction:"Play over the A minor backing track. Start in position 1, then try to move up to position 2 mid-solo. Don't think too hard — just explore the connection between the two boxes.", links:[{icon:"▶️",label:"A Minor Backing Track",url:"https://www.youtube.com/watch?v=HxNGxr7jyqk"}]},
+      { time:"5 min", title:"Drums: Add Hi-Hat 8th Notes", type:"drums", instruction:"Your basic beat but now hi-hat on every 8th note (8 hits per bar instead of 4). This is the standard rock/pop beat. If coordination is hard, practice just kick + hi-hat first, then add snare.", links:[{icon:"▶️",label:"Drumeo: Adding Hi-Hat",url:"https://www.youtube.com/watch?v=1NFZkJQElLI"}]},
+    ]
+  },
+  {
+    title: "Songwriting Session 1 — Your First Chord Progression",
+    subtitle: "You have enough tools to write something today. This is the whole point.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Chord Progression Noodle", type:"warmup", instruction:"No metronome. Just play chords freely. Move around between Am, G, F, C, Em, Dm. See what combinations catch your ear. You're warming up AND hunting for a progression simultaneously.", links:[]},
+      { time:"10 min", title:"Build a 4-Chord Progression", type:"create", instruction:"Choose 4 chords that sound good together. Some starting points: <strong>Am-F-C-G</strong> (minor feel, used in hundreds of hits), <strong>Dm-Am-Bb-F</strong> (darker/moodier), <strong>G-D-Em-C</strong> (bright, uplifting). Find your own by experimenting. Record a voice memo the moment you find something you like.", links:[{icon:"▶️",label:"Signals Music: Writing Chord Progressions",url:"https://www.youtube.com/watch?v=p_M0A3bMk0Y"}]},
+      { time:"8 min", title:"Apply a Strum Pattern to Your Progression", type:"technique", instruction:"Take the progression you just found and apply the D-DU-UDU strumming pattern. Loop it 8 times. Does it feel like a song section? Try the muted funk pattern too. Which feel fits better?", links:[]},
+      { time:"7 min", title:"Piano: Play Your Progression on Keys", type:"piano", instruction:"Take the same 4 chords to the piano. Play them in root position. Notice how the harmony sounds cleaner and more obvious on piano. This cross-instrument perspective is incredibly useful for songwriting.", links:[{icon:"🎹",label:"Planted Piano: Chord Progressions",url:"https://www.youtube.com/@PlantedPiano"}]},
+    ]
+  },
+  {
+    title: "Sing & Play Simultaneously",
+    subtitle: "Separating your voice from your hands is one of the most challenging and rewarding things you'll do.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Strum and Hum", type:"warmup", instruction:"Pick a simple progression (G-C-D). Strum it and hum any melody. Don't think about it — just make noise with your mouth while your hands do their thing. The goal is getting comfortable with both happening at once.", links:[]},
+      { time:"10 min", title:"Strum a Simple Song and Sing the Melody", type:"song", instruction:"Pick a song you know well by heart with simple chords. Strum slowly (half tempo) and sing. If you lose the strum when you sing, that's the thing to fix: slow the tempo until your hands can go on autopilot. The voice will follow.", links:[{icon:"📄",label:"Ultimate Guitar — Find Your Song",url:"https://www.ultimate-guitar.com"},{icon:"🔍",label:"Chordify",url:"https://www.chordify.net"}]},
+      { time:"8 min", title:"Layer in Your Progression + Original Melody", type:"create", instruction:"Use the chord progression you wrote yesterday. Strum it and improvise a vocal melody over it. Doesn't need to be words — just 'la la la' or hum. You're looking for a melody that feels natural over the chords. Record everything.", links:[]},
+      { time:"7 min", title:"Music Theory: The vi Chord (Relative Minor)", type:"theory", instruction:"Every major key has a relative minor. In G major, the vi chord is Em. In C major it's Am. This is why Am-F-C-G and G-Em-C-D both sound emotional — they're using the same notes. This concept unlocks a huge amount of songwriting.", links:[{icon:"📚",label:"musictheory.net: Minor Keys",url:"https://www.musictheory.net/lessons/26"},{icon:"▶️",label:"Signals Music: Relative Minor",url:"https://www.youtube.com/watch?v=NHe3NKQB280"}]},
+    ]
+  },
+  {
+    title: "Groove Reference Day — Learn From the Greats",
+    subtitle: "The best way to absorb groove is to study the people who defined it.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Pentatonic Position 1 with Feel", type:"warmup", instruction:"Play the A minor pentatonic slowly. Add a bend on the high note (push the string up a half step). Add a slide from below on the first note. Play it with as much expression as possible — this is about feel, not notes.", links:[]},
+      { time:"10 min", title:"Learn a Riff from Your Genre", type:"song", instruction:"Pick ONE of these iconic groovy riffs to learn today: <strong>Tame Impala - The Less I Know the Better</strong> (riff), <strong>Khruangbin - Evan Finds the Third Room</strong> (intro), <strong>RHCP - Can't Stop</strong> (main riff), <strong>Arctic Monkeys - R U Mine?</strong> (riff). Use the tab link below.", links:[{icon:"📄",label:"Ultimate Guitar Tabs",url:"https://www.ultimate-guitar.com"},{icon:"🎼",label:"Songsterr — Playback Tabs",url:"https://www.songsterr.com"}]},
+      { time:"8 min", title:"Drums: Learn the Groove Behind That Song", type:"drums", instruction:"Look up the drum pattern for the same song you just learned the riff from. Play the basic beat version on your kit. When your drums and guitar lock together on the same song — even loosely — that's the beginning of playing music, not just playing instruments.", links:[{icon:"▶️",label:"Drumeo: Song Drum Lessons",url:"https://www.youtube.com/@Drumeo"}]},
+      { time:"7 min", title:"Ear Training: Transcription Exercise", type:"ear", instruction:"Pick any short melody (even a TV theme or ringtone). Try to find the first 4-5 notes on your guitar by ear. This is called transcription and it's how all great musicians develop their ear. Don't look it up — discover it.", links:[]},
+    ]
+  },
+  {
+    title: "Week 2 Review — Consolidate Groove & Theory",
+    subtitle: "Groove, fingerpicking, pentatonic positions, and your first song idea. Lock it all in.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Full Technique Chain", type:"warmup", instruction:"2 min pentatonic positions 1 and 2 back to back. 2 min Travis picking on G. 1 min muted 16th note strumming.", links:[]},
+      { time:"10 min", title:"Play Your Original Chord Progression", type:"create", instruction:"Pull up the progression you wrote on Day 11. Play it 8 times with the strumming pattern. Then 8 times fingerpicked. Then try humming/singing a melody over it. Record this. It's your first song idea.", links:[]},
+      { time:"8 min", title:"Theory Quiz: Name the Chords in a Key", type:"theory", instruction:"In G major: what are the 7 chords? In D major? In A major? Use the formula: major, minor, minor, major, major, minor, diminished. If you can answer from memory, your theory foundation is solid. If not, use the link to review.", links:[{icon:"📚",label:"musictheory.net: Diatonic Chords",url:"https://www.musictheory.net/lessons/54"}]},
+      { time:"7 min", title:"Piano: Play Chords in G Major", type:"piano", instruction:"G (I), Am (ii), Bm (iii), C (IV), D (V), Em (vi). Play each chord, left hand root + right hand chord. Notice how this maps identically to what you're playing on guitar.", links:[{icon:"🎹",label:"Planted Piano",url:"https://www.youtube.com/@PlantedPiano"}]},
+    ]
+  },
+
+  // WEEK 3 — CAGED, Scales & Expression
+  {
+    title: "CAGED System — Introduction",
+    subtitle: "CAGED unlocks the entire fretboard. Every chord you know can be played in 5 different places.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Open Chord Shapes Review", type:"warmup", instruction:"Play C, A, G, E, D shapes. Notice that each shape has a different 'feel' and look. These 5 shapes are the foundation of the CAGED system — they tile across the entire neck.", links:[]},
+      { time:"12 min", title:"CAGED: The C Shape Moving Up the Neck", type:"technique", instruction:"A C major open chord is a barre chord shape at fret 0. Move that exact shape up to fret 3 (barre at 3) and you get Eb major. Move to fret 5 and you get F major. The shape moves, the fingering stays the same. Start by just understanding this concept — don't memorize everything yet.", links:[{icon:"▶️",label:"JustinGuitar: CAGED System",url:"https://www.justinguitar.com/guitar-lessons/the-caged-system-intermediate-1"},{icon:"▶️",label:"Paul Davids: CAGED Explained",url:"https://www.youtube.com/watch?v=RMPpABRZBH0"}]},
+      { time:"8 min", title:"Find G Major in 3 Positions on the Neck", type:"technique", instruction:"Using CAGED, find the G chord: open position (G shape), at fret 5 (D shape barre), at fret 10 (A shape barre). Play each one. They all sound like G major — just in different places. This is how guitarists navigate the whole neck.", links:[]},
+      { time:"5 min", title:"Ear Training: Perfect 4th and 5th", type:"ear", instruction:"These are the most important intervals to know. Perfect 5th = power chord, the backbone of rock. Perfect 4th = that Jimi Hendrix / funk guitar sound. Train until you can identify them instantly.", links:[{icon:"👂",label:"ToneDear Interval Training",url:"https://www.tonedear.com"}]},
+    ]
+  },
+  {
+    title: "Expression: Bends, Slides & Vibrato",
+    subtitle: "These techniques transform you from playing notes to saying something with them.",
+    blocks: [
+      { time:"5 min", title:"Warmup: String Bending Prep", type:"warmup", instruction:"On the B string at fret 7, place your ring finger and support it with your middle and index fingers behind it. Push the string upward (toward the ceiling). You're not just bending with one finger — you use all three for strength. This is proper technique.", links:[]},
+      { time:"12 min", title:"Half Step and Whole Step Bends", type:"technique", instruction:"A <strong>half step bend</strong> raises the pitch by one fret. A <strong>whole step bend</strong> by two frets. On the B string fret 7 in A minor pentatonic: bend to the note at fret 8 (half step) and then fret 9 (whole step). Use your ear — when it sounds like the target note, you've bent it right.", links:[{icon:"▶️",label:"JustinGuitar: String Bending",url:"https://www.justinguitar.com/guitar-lessons/string-bending-im-111"},{icon:"▶️",label:"Marty Music: Bending Technique",url:"https://www.youtube.com/watch?v=n3VQRiLM7cI"}]},
+      { time:"8 min", title:"Slides + Vibrato Over Backing Track", type:"create", instruction:"Use the A minor backing track. Play pentatonic position 1 and incorporate: slides (slide your finger into a note from below), and vibrato (wiggle the string side-to-side after hitting a note). Aim for expression, not accuracy.", links:[{icon:"▶️",label:"A Minor Backing Track",url:"https://www.youtube.com/watch?v=HxNGxr7jyqk"}]},
+      { time:"5 min", title:"Drums: Basic Funk Beat", type:"drums", instruction:"Kick on beat 1 and the 'and' of 2 (the syncopated hit). Snare on 2 and 4. Hi-hat 8th notes. This slight shift of the kick is what gives funk its forward-leaning groove. Practice slowly.", links:[{icon:"▶️",label:"Stephen Taylor Drums: Funk Beat",url:"https://www.youtube.com/@Stephen_Taylor"}]},
+    ]
+  },
+  {
+    title: "Blues Scale — The Emotional Extra Note",
+    subtitle: "Add one note to the pentatonic and unlock the blues, soul, and R&B sound.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Pentatonic Position 1 + Bends", type:"warmup", instruction:"Run the A minor pentatonic position 1 slowly. Bend the last note on the high E. Bend the note on the B string. Add a slide somewhere. 5 minutes of expressive warmup.", links:[]},
+      { time:"12 min", title:"A Minor Blues Scale — The b5 'Blue Note'", type:"technique", instruction:"The blues scale adds one note to the minor pentatonic: the flat 5 (b5), also called the 'blue note.' In A minor pentatonic position 1, it's found at fret 6 on the G string (between frets 5 and 7). Add it to your scale pattern and you'll immediately hear that blues sound.", links:[{icon:"▶️",label:"JustinGuitar: Blues Scale",url:"https://www.justinguitar.com/guitar-lessons/the-blues-scale-bc-199"},{icon:"▶️",label:"Marty Music: Blues Scale",url:"https://www.youtube.com/watch?v=JGGcpOGy7EU"}]},
+      { time:"8 min", title:"Improvise Using Blues Scale", type:"create", instruction:"Over the A minor backing track, use the blues scale. Lean into the blue note — bend into it, slide into it, use it as a passing note. It sounds best when it's used with tension (landing on it) then resolving to a note nearby.", links:[{icon:"▶️",label:"A Minor Backing Track",url:"https://www.youtube.com/watch?v=HxNGxr7jyqk"}]},
+      { time:"5 min", title:"Music Theory: What Is a 7th Chord?", type:"theory", instruction:"A 7th chord adds one note to a triad. The dominant 7 (G7) has a bluesy, tense sound that wants to resolve. The minor 7 (Am7) is smooth and soulful. These are everywhere in funk, soul, and R&B. Start recognizing them.", links:[{icon:"📚",label:"musictheory.net: Seventh Chords",url:"https://www.musictheory.net/lessons/43"}]},
+    ]
+  },
+  {
+    title: "7th Chords — The Sound of Soul & Funk",
+    subtitle: "Minor 7ths and dominant 7ths are the defining harmonic color of groovy music.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Chord Voicings Exploration", type:"warmup", instruction:"Play Am. Now add your pinky to the 3rd fret of the B string — that's Am7 (open voicing). Hear how it opens up? Try the same with Em (Em7 = add open B string). These small changes create huge tonal shifts.", links:[]},
+      { time:"12 min", title:"Learn Am7, Dm7, G7, Cmaj7", type:"technique", instruction:"These four chords are the backbone of soul, R&B, and funk. Am7 and Dm7 are smooth and floating. G7 has tension that resolves to C. Cmaj7 is lush and dreamy. Learn each shape and practice switching between them.", links:[{icon:"▶️",label:"JustinGuitar: 7th Chords",url:"https://www.justinguitar.com/guitar-lessons/major-7th-chords-im-122"},{icon:"▶️",label:"Marty Music: 7th Chord Shapes",url:"https://www.youtube.com/watch?v=Ye8-TNcLaKo"}]},
+      { time:"8 min", title:"Write a Progression Using 7th Chords", type:"create", instruction:"Try: <strong>Am7 → Dm7 → G7 → Cmaj7</strong>. This is the ii-V-I-IV in jazz/soul and it's one of the most beautiful chord movements in music. Play it slowly fingerpicked. Record it. Add your voice over the top.", links:[]},
+      { time:"5 min", title:"Piano: Play the Same Progression on Keys", type:"piano", instruction:"Am7, Dm7, G7, Cmaj7 on piano. When you see these chords laid out on piano keys, the extensions (the 7th note) become visually obvious. This helps you understand why these chords sound the way they do.", links:[{icon:"🎹",label:"Planted Piano",url:"https://www.youtube.com/@PlantedPiano"},{icon:"📚",label:"musictheory.net: Seventh Chords",url:"https://www.musictheory.net/lessons/43"}]},
+    ]
+  },
+  {
+    title: "Chord Transitions at Speed — Metronome Challenge",
+    subtitle: "Speed comes from accuracy, not practice at speed. Today we push tempo systematically.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Isolated Transition Reps", type:"warmup", instruction:"Just two chords: G and F. Switch back and forth 20 times as fast as you can while staying clean. Then Am and Bm. The goal is to identify which transitions are your slowest and focus your session there.", links:[]},
+      { time:"12 min", title:"Metronome Ladder: Start Slow, Climb", type:"technique", instruction:"Play G → C → D → Em at 60 BPM (8 beats each). When clean, go to 70. Then 80. Then 90. Stop when transitions start getting sloppy. Stay at that tempo until it's clean. This is how you build real speed — not by practicing fast, but by making slow feel automatic.", links:[{icon:"⏱️",label:"Free Metronome",url:"https://www.musicca.com/metronome"}]},
+      { time:"8 min", title:"Apply to Your Original Progression", type:"technique", instruction:"Take the progression you wrote in Week 2. Run it through the metronome ladder (60, 70, 80, 90 BPM). Record the version at 80 BPM. Notice how much tighter it sounds than when you first wrote it.", links:[]},
+      { time:"5 min", title:"Ear Training: Identify Chord Progressions", type:"ear", instruction:"Pull up a song you love. Listen to just the first 4 chords. Try to identify if each chord is major or minor. Can you figure out the root note? You don't need to name every chord — just start hearing the harmonic movement.", links:[{icon:"🔍",label:"Chordify — See Chords in Real Time",url:"https://www.chordify.net"}]},
+    ]
+  },
+  {
+    title: "Recording Introduction — Capture Your First Idea",
+    subtitle: "You've been writing. Now let's actually record something.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Run Your Best Stuff", type:"warmup", instruction:"Play everything you feel most confident about: your progression, a riff you've been working on, a pentatonic run with bends. This is your pre-recording warmup.", links:[]},
+      { time:"12 min", title:"Set Up GarageBand or Audacity", type:"create", instruction:"Open GarageBand (Mac/iOS) or Audacity (any platform). Create a new project. Either plug your electric guitar into your interface, or put your phone/laptop near your acoustic/amp. Record one pass of your chord progression. Don't edit — just listen back. What do you notice?", links:[{icon:"🎙️",label:"GarageBand (Mac/iOS)",url:"https://www.apple.com/mac/garageband/"},{icon:"🔊",label:"Audacity (Free Download)",url:"https://www.audacityteam.org"},{icon:"▶️",label:"GarageBand Beginner Tutorial",url:"https://www.youtube.com/watch?v=lYJ5fMpv4Go"}]},
+      { time:"8 min", title:"Record 2 Passes: Rhythm + Improvised Lead", type:"create", instruction:"First pass: record your chord progression as the rhythm track. Second pass: record yourself improvising over it with the pentatonic scale. Even if it's rough — you're now multi-tracking. That's the core skill of home recording.", links:[]},
+      { time:"5 min", title:"Drums: Play to Your Recording", type:"drums", instruction:"Play back your guitar recording through a speaker. Sit at the kit and play a basic beat to it. This is what a full band session feels like. Even at beginner level, this locks in groove instincts incredibly fast.", links:[]},
+    ]
+  },
+  {
+    title: "Week 3 Review + Mini Song Demo",
+    subtitle: "You have chords, a scale, expression tools, 7th chords, and recording basics. Make something.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Expressive Scale Run", type:"warmup", instruction:"Blues scale position 1. Slow tempo. Every note with maximum expression: bends, slides, vibrato. Pretend someone is listening and you're trying to make them feel something.", links:[]},
+      { time:"10 min", title:"Arrange Your Song Idea: Verse + Chorus", type:"create", instruction:"Take your chord progression. Can you create two sections? Maybe 4 chords for a verse (fingerpicked), different 4 chords or same chords strummed harder for a chorus? A simple verse/chorus structure is a complete song skeleton.", links:[{icon:"▶️",label:"Signals Music: Song Structure",url:"https://www.youtube.com/watch?v=p_M0A3bMk0Y"}]},
+      { time:"10 min", title:"Record a Full Demo: Verse + Chorus", type:"create", instruction:"In GarageBand or Audacity, record: <strong>Verse</strong> (fingerpicked, your chords), <strong>Chorus</strong> (strummed, maybe the same or different chords), <strong>Verse again</strong>. Add a vocal melody (hum if you don't have lyrics). This is your first demo. Save it.", links:[{icon:"🎙️",label:"GarageBand",url:"https://www.apple.com/mac/garageband/"},{icon:"🔊",label:"Audacity",url:"https://www.audacityteam.org"}]},
+      { time:"5 min", title:"Reflect + Plan Next Week", type:"theory", instruction:"What felt hardest this week? Write it down (or voice memo it). Barre chords? Staying in time? Transitions? Knowing your weak spot is your practice plan. Next week we go into CAGED deeper and start connecting scales across the whole neck.", links:[]},
+    ]
+  },
+
+  // WEEK 4 — Putting It All Together
+  {
+    title: "CAGED + Scale Positions Together",
+    subtitle: "Connect the CAGED chord shapes to the pentatonic scale positions — this is the big unlock.",
+    blocks: [
+      { time:"5 min", title:"Warmup: CAGED G Chord in 3 Positions", type:"warmup", instruction:"Play G major as: open shape, D-shape barre at fret 5 (C shape actually), A-shape barre at fret 10. These are the same chord in three places. Warm up moving between them.", links:[]},
+      { time:"12 min", title:"Pentatonic Position 1 Lives Inside the E-Shape CAGED Chord", type:"technique", instruction:"The A minor pentatonic position 1 (frets 5-8) completely surrounds the E-shape Am barre chord at fret 5. The chord tones are inside the scale. This is the core insight of CAGED + pentatonic: your scale and your chord live in the same neighborhood on the neck.", links:[{icon:"▶️",label:"JustinGuitar: CAGED + Scales",url:"https://www.justinguitar.com/guitar-lessons/caged-minor-pentatonic-shapes-im-152"},{icon:"▶️",label:"Paul Davids: CAGED + Pentatonic",url:"https://www.youtube.com/watch?v=RMPpABRZBH0"}]},
+      { time:"8 min", title:"Solo Over Backing Track Staying in One Position", type:"create", instruction:"A minor backing track. Stay entirely in position 1 for 4 minutes, then shift to position 2 for 4 minutes. Notice how the same notes feel different in different positions. Moving positions = moving your voice across the fretboard.", links:[{icon:"▶️",label:"A Minor Backing Track",url:"https://www.youtube.com/watch?v=HxNGxr7jyqk"}]},
+      { time:"5 min", title:"Ear Training: Recognizing a ii-V-I", type:"ear", instruction:"The ii-V-I progression (like Dm7-G7-Cmaj7) is the most common harmonic movement in jazz and soul. Listen for it in songs you love. When you hear that 'tension-release' feeling, you're probably hearing a V resolving to I.", links:[{icon:"👂",label:"ToneDear",url:"https://www.tonedear.com"}]},
+    ]
+  },
+  {
+    title: "Lyric Writing — Turning Feeling Into Words",
+    subtitle: "Lyrics don't have to be poetry. They have to be honest.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Sing Over Your Progression", type:"warmup", instruction:"Play your chord progression and sing / hum freely for 5 minutes. No words necessary. Just practice having your mouth open and making sound while your hands play. This is warming up the voice-guitar coordination.", links:[]},
+      { time:"10 min", title:"Write 4 Lines: No Filter", type:"create", instruction:"Set a timer for 10 minutes. Write 4 lines about anything — a feeling, a person, a place, a moment. They don't need to rhyme. They don't need to be good. The rules: write without stopping, don't delete anything, don't judge it. The goal is getting words on the page.", links:[{icon:"▶️",label:"Rick Beato: How to Write Lyrics",url:"https://www.youtube.com/watch?v=ORQB0u4G3iM"}]},
+      { time:"8 min", title:"Fit Your Lines to Your Chord Progression", type:"create", instruction:"Take one of your 4 lines and try to sing it over your progression. It won't fit perfectly — that's fine. Stretch words, cut words, change the rhythm of how you say them. The melody comes from trying to fit the words to the music.", links:[]},
+      { time:"7 min", title:"Piano + Lyrics: Sketch the Whole Song on Keys", type:"piano", instruction:"Play your chord progression on piano and sing your lyric over it. Piano gives you a different perspective — you might find the melody feels different and suggests new lyric ideas. Record everything.", links:[]},
+    ]
+  },
+  {
+    title: "Electric Guitar Tone — Dialing In Your Sound",
+    subtitle: "Your amp is an instrument. Learn to use it.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Play on Electric, Amp Loud", type:"warmup", instruction:"Plug in your electric. Turn the amp up enough that the room feels alive. Play your progression. The acoustic habits that work on acoustic don't always translate — notice how touch and dynamics change.", links:[]},
+      { time:"10 min", title:"Amp EQ: Treble, Mid, Bass Exploration", type:"technique", instruction:"Start with all knobs at noon (5/10). Play your progression. Then: turn treble all the way up (bright, harsh). Then all the way down (muddy, dark). Find your sweet spot. Do the same with mids (scoop = modern rock, bump = blues/funk) and bass (tight vs boomy). Learn what each knob actually does.", links:[{icon:"▶️",label:"Paul Davids: Guitar Tone Basics",url:"https://www.youtube.com/watch?v=Uy_PsGbBYSk"}]},
+      { time:"8 min", title:"Clean vs Light Overdrive Tones", type:"technique", instruction:"Most amps have a gain knob. Start clean (gain at 0-2). Notice the clarity and dynamic range. Now slowly increase gain to 4-5 — light overdrive, slightly compressed, slightly crunchy. This is the tone of most indie, funk, and light rock. Go to 7-8 for heavier rock. Find the tone that fits your genre.", links:[]},
+      { time:"7 min", title:"Record Both Tones in GarageBand", type:"create", instruction:"Record 30 seconds of your progression with a clean tone. Then the same section with light overdrive. Listen back. Which one feels like your sound? Knowing your tone is knowing your musical identity.", links:[{icon:"🎙️",label:"GarageBand",url:"https://www.apple.com/mac/garageband/"}]},
+    ]
+  },
+  {
+    title: "Full Jam Session — Drums + Guitar Together",
+    subtitle: "The most fun day so far. Play your guitar, then play drums over a recording of yourself.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Loose and Groovy", type:"warmup", instruction:"Put on one of your reference songs (Khruangbin, Tame Impala, RHCP) and just play along loosely for 5 minutes. Don't worry about getting it right — absorb the feel.", links:[]},
+      { time:"10 min", title:"Record a Full Guitar Track (Rhythm + Lead)", type:"create", instruction:"In GarageBand or Audacity, record: <strong>4 bars rhythm strumming</strong>, then <strong>4 bars improvised lead</strong>, then repeat 3 times. This gives you a 48-bar track to play drums over. Keep it simple — this is a drum backing track you're creating.", links:[{icon:"🎙️",label:"GarageBand",url:"https://www.apple.com/mac/garageband/"}]},
+      { time:"10 min", title:"Play Drums to Your Guitar Recording", type:"drums", instruction:"Play back your guitar recording. Sit at the kit and play along. Start with just kick and snare to lock in the groove. Add hi-hat once kick and snare feel solid. This is a full band simulation. Record video of yourself if possible — watching yourself play is incredibly useful.", links:[{icon:"▶️",label:"Drumeo: Playing to a Track",url:"https://www.youtube.com/@Drumeo"}]},
+      { time:"5 min", title:"Listen Back and Note What to Improve", type:"create", instruction:"Listen to the guitar recording. What was tight? What rushed? Did the drums lock with the guitar? Write down 2 things to fix next time. Progress comes from honest listening, not just playing.", links:[]},
+    ]
+  },
+  {
+    title: "Song Polish Day — Arrange and Refine",
+    subtitle: "Take your best song idea and make it feel complete.",
+    blocks: [
+      { time:"5 min", title:"Warmup: Play the Song Start to Finish", type:"warmup", instruction:"Play your song idea (verse + chorus + verse) all the way through without stopping. Even if you make mistakes — don't stop. Treat it like a performance. Notice what falls apart and what holds together.", links:[]},
+      { time:"12 min", title:"Add an Intro and Outro", type:"create", instruction:"An intro can be as simple as 2 bars of your verse chords picked softly. An outro can be the chorus progression fading out with improvised lead over it. Give your song a beginning and an end — it changes how the whole thing feels.", links:[{icon:"▶️",label:"Signals Music: Song Structure Deep Dive",url:"https://www.youtube.com/watch?v=p_M0A3bMk0Y"}]},
+      { time:"8 min", title:"Record the Full Arranged Version", type:"create", instruction:"Record: Intro → Verse → Chorus → Verse → Chorus → Outro. Even if it's just one guitar track and a hummed melody. This is a complete song demo. Save the file with today's date. You'll want to look back on this in 6 months.", links:[{icon:"🎙️",label:"GarageBand",url:"https://www.apple.com/mac/garageband/"},{icon:"🔊",label:"Audacity",url:"https://www.audacityteam.org"}]},
+      { time:"5 min", title:"Ear Training: Final Challenge", type:"ear", instruction:"Open Chordify and load a song in your genre you've never analyzed before. Try to identify: is it major or minor key? What are the first 4 chords? Name at least 2 of them correctly. This tests everything your ear has learned this month.", links:[{icon:"🔍",label:"Chordify",url:"https://www.chordify.net"},{icon:"👂",label:"ToneDear",url:"https://www.tonedear.com"}]},
+    ]
+  },
+  {
+    title: "Month 1 Finale — Full Review & What's Next",
+    subtitle: "28 days in. Look how far you've come. Set your intentions for Month 2.",
+    blocks: [
+      { time:"5 min", title:"Warmup: The Greatest Hits", type:"warmup", instruction:"Play one of everything you've learned: an open chord, a barre chord, a pentatonic run with a bend, a blues lick, the Travis picking pattern, a 7th chord. This is your technique library after 4 weeks.", links:[]},
+      { time:"10 min", title:"Play Your Full Song, Best Version", type:"create", instruction:"One clean take of your song: intro, verse, chorus, verse, chorus, outro. Sing/hum the melody. Record it. This is your Month 1 benchmark recording — you'll compare this to your Month 2 and Month 3 recordings.", links:[{icon:"🎙️",label:"GarageBand",url:"https://www.apple.com/mac/garageband/"}]},
+      { time:"8 min", title:"Reflect: What to Focus on in Month 2", type:"theory", instruction:"Month 2 priorities based on your goals: <strong>1)</strong> Pentatonic positions 4 and 5. <strong>2)</strong> Dorian mode (the funk/jazz minor scale). <strong>3)</strong> Full CAGED system. <strong>4)</strong> Singing + playing more complex songs. <strong>5)</strong> First full multi-track recording with drums and guitar. Pick your top 2.", links:[{icon:"▶️",label:"JustinGuitar: Intermediate Path",url:"https://www.justinguitar.com/categories/intermediate-guitar-lessons"},{icon:"▶️",label:"Signals Music: Dorian Mode",url:"https://www.youtube.com/watch?v=rCN0b40nBBY"}]},
+      { time:"7 min", title:"Piano + Drums Milestone Check", type:"piano", instruction:"Piano: can you play I-IV-V-vi in C major with both hands smoothly? If yes, try G major. Drums: can you play a basic 4/4 beat with hi-hat 8th notes for 2 minutes without losing the groove? If both yes — you're exactly where you should be after Month 1.", links:[{icon:"🎹",label:"Planted Piano",url:"https://www.youtube.com/@PlantedPiano"},{icon:"▶️",label:"Drumeo: Progress Check",url:"https://www.youtube.com/@Drumeo"}]},
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+// SUPABASE CLOUD SYNC
+// ─────────────────────────────────────────────
+const LOCAL_KEY = 'guitar_course_v2';
+const CREDS_KEY = 'guitar_supabase_creds';
+let SUPABASE_URL = '';
+let SUPABASE_ANON_KEY = '';
+let USER_ID = '';
+let syncTimeout = null;
+
+function loadCreds() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CREDS_KEY) || '{}');
+    SUPABASE_URL = c.url || '';
+    SUPABASE_ANON_KEY = c.key || '';
+    USER_ID = c.uid || '';
+  } catch(e) {}
+}
+
+function saveCreds(url, key, uid) {
+  SUPABASE_URL = url.replace(/\/$/, '');
+  SUPABASE_ANON_KEY = key;
+  USER_ID = uid;
+  localStorage.setItem(CREDS_KEY, JSON.stringify({ url: SUPABASE_URL, key: SUPABASE_ANON_KEY, uid: USER_ID }));
+}
+
+function clearCreds() {
+  localStorage.removeItem(CREDS_KEY);
+  SUPABASE_URL = ''; SUPABASE_ANON_KEY = ''; USER_ID = '';
+}
+
+function hasSupabase() { return !!(SUPABASE_URL && SUPABASE_ANON_KEY && USER_ID); }
+
+async function supabaseFetch(method, body) {
+  const url = `${SUPABASE_URL}/rest/v1/guitar_progress?user_id=eq.${encodeURIComponent(USER_ID)}`;
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': method === 'POST' ? 'resolution=merge-duplicates' : ''
+  };
+  const res = await fetch(method === 'GET' ? url : `${SUPABASE_URL}/rest/v1/guitar_progress`, {
+    method, headers,
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(`Supabase ${method} failed: ${res.status}`);
+  return method === 'GET' ? res.json() : res;
+}
+
+async function cloudLoad() {
+  if (!hasSupabase()) return null;
+  try {
+    const rows = await supabaseFetch('GET');
+    if (rows && rows.length > 0) return rows[0].data;
+  } catch(e) { console.warn('Cloud load failed:', e); }
+  return null;
+}
+
+async function cloudSave(data) {
+  if (!hasSupabase()) return;
+  try {
+    await supabaseFetch('POST', { user_id: USER_ID, data, updated_at: new Date().toISOString() });
+  } catch(e) { console.warn('Cloud save failed:', e); }
+}
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let state = { currentDay: 0, completedDays: [], openBlocks: {}, skills: {} };
+
+function loadLocalState() {
+  try {
+    const saved = localStorage.getItem(LOCAL_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch(e) {}
+}
+
+function saveLocalState() {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function saveState() {
+  saveLocalState();
+  // Debounce cloud saves — wait 1.5s after last change
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    if (hasSupabase()) {
+      setSyncStatus('syncing');
+      await cloudSave(state);
+      setSyncStatus('synced');
+    }
+  }, 1500);
+}
+
+async function loadState() {
+  loadCreds();
+  loadLocalState();
+  if (hasSupabase()) {
+    setSyncStatus('syncing');
+    const cloud = await cloudLoad();
+    if (cloud) {
+      state = { ...state, ...cloud };
+      saveLocalState();
+    }
+    setSyncStatus('synced');
+  }
+}
+
+function setSyncStatus(s) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  if (s === 'syncing') { el.textContent = '↻ syncing'; el.style.color = 'var(--muted)'; }
+  else if (s === 'synced') { el.textContent = '✓ synced'; el.style.color = 'var(--accent3)'; }
+  else { el.textContent = '⚠ offline'; el.style.color = 'var(--accent2)'; }
+}
+
+// ─────────────────────────────────────────────
+// SETUP SCREEN
+// ─────────────────────────────────────────────
+function showSetup() {
+  document.getElementById('setup-overlay').style.display = 'flex';
+}
+
+function hideSetup() {
+  document.getElementById('setup-overlay').style.display = 'none';
+}
+
+async function connectSupabase() {
+  const url = document.getElementById('sb-url').value.trim();
+  const key = document.getElementById('sb-key').value.trim();
+  const uid = document.getElementById('sb-uid').value.trim() || 'luca';
+  if (!url || !key) { alert('Paste both your Supabase URL and anon key.'); return; }
+
+  // Validate by trying to create the table row
+  saveCreds(url, key, uid);
+
+  // Try a quick test write
+  try {
+    document.getElementById('sb-connect-btn').textContent = 'Connecting...';
+    await cloudSave(state);
+    hideSetup();
+    setSyncStatus('synced');
+    document.getElementById('sb-connect-btn').textContent = 'Connect & Sync';
+    alert('✓ Connected! Your progress will now sync across all devices.');
+  } catch(e) {
+    clearCreds();
+    document.getElementById('sb-connect-btn').textContent = 'Connect & Sync';
+    alert('Connection failed. Double-check your URL and anon key, and make sure you created the table (see instructions above).');
+  }
+}
+
+function disconnectSupabase() {
+  if (confirm('Disconnect cloud sync? Your local progress stays saved on this device.')) {
+    clearCreds();
+    setSyncStatus('offline');
+    hideSetup();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderToday() {
+  const day = state.currentDay;
+  const lesson = LESSONS[day];
+  const isDone = state.completedDays.includes(day);
+
+  // Indicator
+  document.getElementById('day-indicator').textContent = `Day ${day + 1} / ${LESSONS.length}`;
+
+  // Streak dots
+  const bar = document.getElementById('streak-bar');
+  bar.innerHTML = '';
+  LESSONS.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot' + (state.completedDays.includes(i) ? ' done' : '') + (i === day ? ' today' : '');
+    dot.title = `Day ${i+1}`;
+    dot.textContent = i + 1;
+    dot.onclick = () => { state.currentDay = i; saveState(); renderToday(); };
+    bar.appendChild(dot);
+  });
+
+  // Build lesson HTML
+  let html = `
+    <div class="lesson-card">
+      <div class="lesson-card-head">
+        <div class="lesson-focus-label">Day ${day + 1} of 28 &nbsp;·&nbsp; Stage 1 &nbsp;·&nbsp; 30 Min</div>
+        <div class="lesson-focus-title">${lesson.title}</div>
+        <div class="lesson-focus-sub">${lesson.subtitle}</div>
+      </div>
+      <div class="practice-blocks">
+  `;
+
+  lesson.blocks.forEach((block, bi) => {
+    const blockKey = `${day}-${bi}`;
+    const isOpen = state.openBlocks[blockKey];
+    const linksHtml = block.links.length ? `
+      <div class="resource-links">
+        ${block.links.map(l => `<a class="res-link" href="${l.url}" target="_blank"><span class="link-icon">${l.icon}</span>${l.label}</a>`).join('')}
+      </div>` : '';
+
+    html += `
+      <div class="pblock${isOpen ? ' open' : ''}" id="pblock-${bi}">
+        <div class="pblock-head" onclick="toggleBlock(${bi})">
+          <div class="pblock-time">${block.time}</div>
+          <div class="pblock-title">${block.title}</div>
+          <span class="pblock-type type-${block.type}">${block.type}</span>
+          <span class="pblock-chevron">▼</span>
+        </div>
+        <div class="pblock-body">
+          <div class="pblock-instruction">${block.instruction}</div>
+          ${linksHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+      <div style="padding: 0 28px 28px;">
+        <button class="complete-btn${isDone ? ' done' : ''}" onclick="markDone(${day})">
+          ${isDone ? '✓ DAY COMPLETE' : 'MARK DAY COMPLETE'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('lesson-output').innerHTML = html;
+}
+
+function toggleBlock(bi) {
+  const blockKey = `${state.currentDay}-${bi}`;
+  state.openBlocks[blockKey] = !state.openBlocks[blockKey];
+  saveState();
+  renderToday();
+}
+
+function changeDay(delta) {
+  const newDay = state.currentDay + delta;
+  if (newDay >= 0 && newDay < LESSONS.length) {
+    state.currentDay = newDay;
+    saveState();
+    renderToday();
+  }
+}
+
+function markDone(day) {
+  if (!state.completedDays.includes(day)) {
+    state.completedDays.push(day);
+  } else {
+    state.completedDays = state.completedDays.filter(d => d !== day);
+  }
+  saveState();
+  renderToday();
+}
+
+// ─────────────────────────────────────────────
+// NAV + STAGE + TRACKER
+// ─────────────────────────────────────────────
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleStage(cardId) {
+  const card = document.getElementById(cardId);
+  const body = card.querySelector('.stage-body');
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.stage-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.stage-card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); card.classList.add('open'); }
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const total = document.querySelectorAll('.tracker-item').length;
+  const done = document.querySelectorAll('.tracker-item.checked').length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} of ${total} completed`;
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+(async () => {
+  await loadState();
+  renderToday();
+})();
+</script>
+<!-- SETUP OVERLAY -->
+<div id="setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:560px;width:100%;padding:36px;max-height:90vh;overflow-y:auto;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:8px;">☁ Cloud Sync Setup</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px;">Connect a free Supabase database so your streak and progress sync across your phone, laptop, and any device. Takes about 3 minutes to set up once.</div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:24px;">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;">Step-by-Step Setup</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.9;">
+        <div style="margin-bottom:8px;"><span style="color:var(--accent);font-family:'Space Mono',monospace;">1.</span> Go to <a href="https://supabase.com" target="_blank" style="color:var(--accent3);">supabase.com</a> → Sign up free → Create a new project (pick any name, any region).</div>
+        <div style="margin-bottom:8px;"><span style="color:var(--accent);font-family:'Space Mono',monospace;">2.</span> In your project, click <strong style="color:var(--text);">SQL Editor</strong> in the left sidebar and run this query:</div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--accent3);line-height:1.8;margin-bottom:8px;overflow-x:auto;">create table guitar_progress (<br>&nbsp;&nbsp;user_id text primary key,<br>&nbsp;&nbsp;data jsonb,<br>&nbsp;&nbsp;updated_at timestamptz<br>);<br><br>alter table guitar_progress enable row level security;<br><br>create policy "public rw" on guitar_progress<br>&nbsp;&nbsp;for all using (true) with check (true);</div>
+        <div style="margin-bottom:8px;"><span style="color:var(--accent);font-family:'Space Mono',monospace;">3.</span> Go to <strong style="color:var(--text);">Project Settings → API</strong>. Copy your <strong style="color:var(--text);">Project URL</strong> and <strong style="color:var(--text);">anon public</strong> key and paste them below.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      <div>
+        <label style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Supabase Project URL</label>
+        <input id="sb-url" type="url" placeholder="https://xxxx.supabase.co" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;" />
+      </div>
+      <div>
+        <label style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Anon Public Key</label>
+        <input id="sb-key" type="text" placeholder="eyJhbGciOiJIUzI1NiIs..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;" />
+      </div>
+      <div>
+        <label style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px;">Your Username (any name, just be consistent across devices)</label>
+        <input id="sb-uid" type="text" placeholder="luca" value="luca" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;" />
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="sb-connect-btn" onclick="connectSupabase()" style="flex:1;padding:14px;background:var(--accent);border:none;border-radius:8px;color:#000;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;">Connect & Sync</button>
+      <button onclick="hideSetup()" style="padding:14px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;cursor:pointer;">Cancel</button>
+      <button onclick="disconnectSupabase()" style="padding:14px 20px;background:var(--surface2);border:1px solid var(--red);border-radius:8px;color:var(--red);font-family:'Space Mono',monospace;font-size:12px;cursor:pointer;">Disconnect</button>
+    </div>
+
+    <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.6;">Your credentials are stored only on your device (localStorage). Nothing is sent anywhere except your own Supabase project.</div>
+  </div>
+</div>
+
+</body>
+</html>
