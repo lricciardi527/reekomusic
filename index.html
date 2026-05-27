@@ -25,21 +25,18 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
     pointer-events: none; z-index: 1000; opacity: 0.4;
   }
-  .hero { padding: 60px 32px 40px; max-width: 900px; margin: 0 auto; }
-  .tag { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; display: block; }
-  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 10vw, 96px); line-height: 0.92; color: var(--text); margin-bottom: 24px; letter-spacing: 1px; }
-  h1 span { color: var(--accent); display: block; }
-  .hero-sub { font-size: 15px; color: var(--muted); max-width: 540px; line-height: 1.7; font-weight: 300; }
-  .profile-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
-  .pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-family: 'Space Mono', monospace; color: var(--muted); }
-  .pill.hot { border-color: var(--accent); color: var(--accent); }
-  .pill.cool { border-color: var(--accent3); color: var(--accent3); }
-  .nav-wrap { max-width: 900px; margin: 0 auto; padding: 0 32px; position: sticky; top: 0; z-index: 100; background: var(--bg); padding-top: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .hero { padding: 24px 32px 20px; max-width: 900px; margin: 0 auto; }
+  .hero-title { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--text); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+  .hero-meta { font-size: 12px; color: var(--muted); line-height: 1.8; }
+  .hero-meta .hi { color: var(--accent); }
+  .hero-meta .cool { color: var(--accent3); }
+  .nav-wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .nav { display: flex; overflow-x: auto; scrollbar-width: none; }
   .nav::-webkit-scrollbar { display: none; }
-  .nav-btn { background: none; border: 1px solid transparent; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 16px; border-radius: 4px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-  .nav-btn:hover { color: var(--text); border-color: var(--border); }
-  .nav-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .nav-btn { background: none; border: none; border-bottom: 3px solid transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 16px 22px; border-radius: 0; cursor: pointer; white-space: nowrap; transition: color 0.2s, border-color 0.2s; }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .nav-sync { margin-left: auto; font-size: 12px; font-family: 'Space Mono', monospace; color: var(--muted); padding: 16px 12px; }
   .content { max-width: 900px; margin: 0 auto; padding: 40px 32px 80px; }
   .section { display: none; }
   .section.active { display: block; }
@@ -204,17 +201,14 @@
 <body>
 
 <div class="hero">
-  <span class="tag">// Your Custom Music Course</span>
-  <h1>LEARN TO<span>PLAY & CREATE</span></h1>
-  <p class="hero-sub">Built around your current level, your gear, and your goals. 30 minutes a day, structured to get you from early learner to songwriter and session player.</p>
-  <div class="profile-pills">
-    <span class="pill hot">🎸 Acoustic + Electric</span>
-    <span class="pill hot">🥁 Real Drum Kit</span>
-    <span class="pill hot">🎹 Real Piano</span>
-    <span class="pill">Early-Intermediate Guitar</span>
-    <span class="pill cool">Goal: Write + Record + Jam</span>
-    <span class="pill">Groovy Genres</span>
-    <span class="pill">30 min/day</span>
+  <div class="hero-title">Luca's Guitar Course</div>
+  <div class="hero-meta">
+    <span class="hi">Guitar</span> — Acoustic + Electric &nbsp;·&nbsp;
+    <span class="hi">Drums</span> — Full Kit &nbsp;·&nbsp;
+    <span class="hi">Piano</span> — Real Piano &nbsp;·&nbsp;
+    Early-Intermediate &nbsp;·&nbsp;
+    <span class="cool">Goal: Write + Record + Jam</span> &nbsp;·&nbsp;
+    30 min/day
   </div>
 </div>
 
@@ -226,8 +220,8 @@
     <button class="nav-btn" onclick="showSection('resources', this)">Resources</button>
     <button class="nav-btn" onclick="showSection('drums-piano', this)">Drums & Piano</button>
     <button class="nav-btn" onclick="showSection('tracker', this)">Progress</button>
-    <button class="nav-btn" onclick="showSetup()" style="margin-left:auto; border-color: var(--border);">☁ Sync</button>
-    <span id="sync-status" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:8px 4px;white-space:nowrap;align-self:center;">local only</span>
+    <button class="nav-btn nav-sync" onclick="showSetup()">☁ Sync</button>
+    <span id="sync-status" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:0 4px;white-space:nowrap;align-self:center;">local only</span>
   </div>
 </div>
 
